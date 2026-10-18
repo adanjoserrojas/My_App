@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>To-Do</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 480px; margin: 40px auto; padding: 0 16px; }
+    form { display: flex; gap: 8px; }
+    input { flex: 1; padding: 8px; }
+    button { padding: 8px 14px; }
+    li { padding: 6px 0; }
+    .error { color: #c00; }
+  </style>
+</head>
+<body>
+  <h1>To-Do</h1>
+  <form id="new-task">
+    <input id="title" placeholder="What needs doing?" autocomplete="off">
+    <button type="submit">Add</button>
+  </form>
+  <p id="error" class="error"></p>
+  <ul id="tasks"></ul>
+
+  <script>
+    const list = document.getElementById("tasks");
+    const error = document.getElementById("error");
+
+    async function loadTasks() {
+      const res = await fetch("/tasks");
+      const tasks = await res.json();
+      list.innerHTML = "";
+      for (const task of tasks) {
+        const li = document.createElement("li");
+        li.textContent = (task.done ? "✔ " : "") + task.title;
+        list.appendChild(li);
+      }
+    }
+
+    document.getElementById("new-task").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const input = document.getElementById("title");
+      const res = await fetch("/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: input.value }),
+      });
+      if (!res.ok) {
+        error.textContent = (await res.json()).error;
+        return;
+      }
+      error.textContent = "";
+      input.value = "";
+      loadTasks();
+    });
+
+    loadTasks();
+  </script>
+</body>
+</html>
