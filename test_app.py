@@ -13,7 +13,7 @@ def client(tmp_path):
 def test_list_starts_empty(client):
     res = client.get("/tasks")
     assert res.status_code == 200
-    assert res.json == []
+    assert res.json == [] #
 
 
 def test_create_and_read_task(client):
